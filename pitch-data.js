@@ -16,8 +16,9 @@
  */
 
 import * as tf from '@tensorflow/tfjs';
-import { readFileSync } from 'fs';
-import { normalize } from './utils';
+import request from 'request';
+
+import {normalize} from './utils';
 
 
 /**
@@ -50,7 +51,8 @@ export function createPitchesTensor(pitches, fields) {
  * Returns an array of pitch class Tensors, each Tensor contains every pitch for
  * a given pitch class.
  */
-export function concatPitchClassTensors(filename, fields, numPitchClasses, pitchClassSize) {
+export function concatPitchClassTensors(
+    filename, fields, numPitchClasses, pitchClassSize) {
   const classTensors = [];
   const testPitches = loadPitchData('dist/pitch_type_training_data.json');
   let index = 0;
@@ -68,13 +70,21 @@ export function concatPitchClassTensors(filename, fields, numPitchClasses, pitch
 /**
  * Loads a JSON training file and the content to a Pitch array.
  */
-export function loadPitchData(filename) {
-  const pitches = [];
-  const content = readFileSync(filename, 'utf-8').split('\n');
-  for (let i = 0; i < content.length - 1; i++) {
-    pitches.push(JSON.parse(content[i]));
-  }
-  return pitches;
+export async function loadPitchData(filename) {
+  request('http://localhost:1234/data.json', (err, response) => {
+    //
+    // TODO - convert data.
+    //
+    console.log('err', err);
+    console.log(response);
+  });
+
+  // const pitches = [];
+  // const content = readFileSync(filename, 'utf-8').split('\n');
+  // for (let i = 0; i < content.length - 1; i++) {
+  //   pitches.push(JSON.parse(content[i]));
+  // }
+  // return pitches;
 }
 
 /**
@@ -83,7 +93,6 @@ export function loadPitchData(filename) {
  */
 export class PitchData {
   constructor(filename, batchSize, fields, labelCount, generateLabel) {
-
     this.batchSize = batchSize;
     this.fields = fields;
     this.generateLabel = generateLabel;
@@ -109,7 +118,7 @@ export class PitchData {
         batchSize = pitches.length - index;
       }
       batches.push(
-        this.singlePitchBatch(pitches.slice(index, index + batchSize)));
+          this.singlePitchBatch(pitches.slice(index, index + batchSize)));
 
       index += this.batchSize;
     }
@@ -136,7 +145,7 @@ export class PitchData {
       return {
         pitches: tf.tensor2d(data, shape),
         labels:
-          tf.oneHot(tf.tensor1d(labels, 'int32'), this.labelCount).toFloat()
+            tf.oneHot(tf.tensor1d(labels, 'int32'), this.labelCount).toFloat()
       };
     });
   }
