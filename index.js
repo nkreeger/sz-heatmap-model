@@ -1,6 +1,10 @@
 import * as tf from '@tensorflow/tfjs';
 
-import {StrikeZoneModel} from './strike-zone-model';
+import {loadTrainingData} from './data';
 
-const model = new StrikeZoneModel();
-console.log(model);
+loadTrainingData('http://localhost:1234/data.csv');
+
+// import {StrikeZoneModel} from './model';
+
+// const model = new StrikeZoneModel();
+// console.log(model);

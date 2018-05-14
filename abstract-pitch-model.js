@@ -20,8 +20,8 @@ import * as tf from '@tensorflow/tfjs';
 /**
  * Abstract base class for defining Pitch ML models.
  */
+// TODO - drop this.
 export class PitchModel {
-
   constructor(modelName) {
     this.modelName = modelName;
     this.totalTrainSteps = 0;
