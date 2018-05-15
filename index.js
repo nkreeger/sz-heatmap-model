@@ -1,10 +1,18 @@
 import * as tf from '@tensorflow/tfjs';
 
-import {loadTrainingData} from './data';
+import {StrikeZoneData} from './data';
+import {StrikeZoneModel} from './model';
 
-loadTrainingData('http://localhost:1234/data.csv');
+const data = new StrikeZoneData('http://localhost:1234/data.csv', 100);
+const model = new StrikeZoneModel();
 
-// import {StrikeZoneModel} from './model';
+async function start() {
+  await data.load();
 
-// const model = new StrikeZoneModel();
-// console.log(model);
+  model.train(10, data.batches, (result) => {
+    console.log(`step ${model.steps}] loss: ${
+        result.loss.toFixed(4)} accuracy: ${result.accuracy.toFixed(4)}`);
+  });
+}
+
+start();
