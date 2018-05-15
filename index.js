@@ -9,7 +9,7 @@ const model = new StrikeZoneModel();
 async function start() {
   await data.load();
 
-  model.train(10, data.batches, (result) => {
+  model.train(1, data.batches, (result) => {
     console.log(`step ${model.steps}] loss: ${
         result.loss.toFixed(4)} accuracy: ${result.accuracy.toFixed(4)}`);
   });

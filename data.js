@@ -40,51 +40,72 @@ export class StrikeZoneData {
         tf.util.shuffle(this.data);
 
         // Create batches.
-        this.batches = [];
-        let index = 0;
-        let batchSize = this.batchSize;
-        while (index < this.data.length) {
-          if (this.data.length - index < this.batchSize) {
-            batchSize = this.data.length - index;
-          }
-
-          const dataBatch = this.data.slice(index, index + batchSize);
-          const shape = [dataBatch.length, NUM_X_FIELDS];
-          const xData = new Float32Array(tf.util.sizeFromShape(shape));
-          const yData = [];
-
-          let offset = 0;
-          for (let i = 0; i < dataBatch.length; i++) {
-            const xyData = dataBatch[i];
-
-            const x = [];
-            x.push(normalize(xyData.x[0], PX_MIN, PX_MAX));
-            x.push(normalize(xyData.x[1], PZ_MIN, PZ_MAX));
-            x.push(normalize(xyData.x[2], SZ_TOP_MIN, SZ_TOP_MAX));
-            x.push(normalize(xyData.x[3], SZ_BOT_MIN, SZ_BOT_MAX));
-            x.push(xyData.x[4]);
-
-            xData.set(x, offset);
-            offset += NUM_X_FIELDS;
-
-            yData.push(xyData.y);
-          }
-
-          // Push batch tensor:
-          this.batches.push({
-            x: tf.tensor2d(xData, shape),
-            y: tf.oneHot(tf.tensor1d(yData, 'int32'), 2).toFloat()
-          });
-
-          index += batchSize;
-        }
-
+        this.batches = createTensorBatches(this.data, this.batchSize);
         console.log(`this.data.length: ${this.data.length}`);
         console.log(`this.batches.length: ${this.batches.length}`);
         resolve();
       });
     });
   }
+
+  zone() {
+    const yMin = 0;
+    const yMax = 4;
+    const xMin = -2;
+    const xMax = 2;
+    const length = 50;
+
+    const data = [];
+    for (let y = yMax; y >= yMin; y = y - (yMax - yMin) / length) {
+      for (let x = xMin; x <= xMax; x = x + (xMax - xMin) / length) {
+        //
+        // TODO(kreeger): Create batches here.
+        //
+      }
+    }
+  }
+}
+
+function createTensorBatches(data, size) {
+  const batches = [];
+  let index = 0;
+  let batchSize = size;
+  while (index < data.length) {
+    if (data.length - index < size) {
+      batchSize = data.length - index;
+    }
+
+    const dataBatch = data.slice(index, index + batchSize);
+    const shape = [dataBatch.length, NUM_X_FIELDS];
+    const xData = new Float32Array(tf.util.sizeFromShape(shape));
+    const yData = [];
+
+    let offset = 0;
+    for (let i = 0; i < dataBatch.length; i++) {
+      const xyData = dataBatch[i];
+
+      const x = [];
+      x.push(normalize(xyData.x[0], PX_MIN, PX_MAX));
+      x.push(normalize(xyData.x[1], PZ_MIN, PZ_MAX));
+      x.push(normalize(xyData.x[2], SZ_TOP_MIN, SZ_TOP_MAX));
+      x.push(normalize(xyData.x[3], SZ_BOT_MIN, SZ_BOT_MAX));
+      x.push(xyData.x[4]);
+
+      xData.set(x, offset);
+      offset += NUM_X_FIELDS;
+
+      yData.push(xyData.y);
+    }
+
+    // Push batch tensor:
+    batches.push({
+      x: tf.tensor2d(xData, shape),
+      y: tf.oneHot(tf.tensor1d(yData, 'int32'), 2).toFloat()
+    });
+
+    index += batchSize;
+  }
+  return batches;
 }
 
 function normalize(value, min, max) {
