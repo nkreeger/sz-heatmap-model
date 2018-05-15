@@ -72,4 +72,20 @@ export class StrikeZoneModel {
     list = list.sort((a, b) => b.value - a.value);
     return list;
   }
+
+  predictAll(data) {
+    const predictions = this.model.predictOnBatch(data);
+    const values = predictions.dataSync();
+
+    const results = [];
+    let index = 0;
+    for (let i = 0; i < values.length; i++) {
+      let list = [];
+      list.push({value: values[index++], strike: 1});
+      list.push({value: values[index++], strike: 0});
+      list = list.sort((a, b) => b.value - a.value);
+      results.push(list);
+    }
+    return results;
+  }
 }

@@ -1,5 +1,5 @@
 
-export function draw(px, pz) {
+export function draw(divId, px, pz) {
   var trace1 = {
     x: px,
     y: pz,
@@ -46,5 +46,5 @@ export function draw(px, pz) {
     xaxis2: {domain: [0.85, 1], showgrid: false, zeroline: false},
     yaxis2: {domain: [0.85, 1], showgrid: false, zeroline: false}
   };
-  Plotly.newPlot('histogram', data, layout);
+  Plotly.newPlot(divId, data, layout);
 }

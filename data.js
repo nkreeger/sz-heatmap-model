@@ -57,7 +57,7 @@ export class StrikeZoneData {
     const xMax = 2;
     const length = 50;
 
-    const data = [];
+    this.zoneCoordinates = [];
     for (let y = yMax; y >= yMin; y = y - (yMax - yMin) / length) {
       for (let x = xMin; x <= xMax; x = x + (xMax - xMin) / length) {
         const xData = [];
@@ -66,11 +66,13 @@ export class StrikeZoneData {
         xData.push(3.5);  // sz_top
         xData.push(1.5);  // sz_bot
         xData.push(0);    // left_handed_batter
-        data.push({x: xData});
+        this.zoneCoordinates.push({x: xData});
       }
     }
 
-    this.zoneData = createTensorBatches(data, 50)[0].x;
+    this.zoneData = createTensorBatches(
+                        this.zoneCoordinates, this.zoneCoordinates.length)[0]
+                        .x;
     return this.zoneData;
   }
 }
