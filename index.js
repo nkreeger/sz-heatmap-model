@@ -13,6 +13,8 @@ async function start() {
     console.log(`step ${model.steps}] loss: ${
         result.loss.toFixed(4)} accuracy: ${result.accuracy.toFixed(4)}`);
   });
+
+  const result = model.predict(data.zone());
 }
 
 start();

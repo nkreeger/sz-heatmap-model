@@ -34,21 +34,23 @@ export class StrikeZoneData {
             x.push(parseFloat(values[3]));      // sz_bot
             x.push(parseFloat(values[4]));      // left_handed_batter
             const y = parseInt(values[5], 10);  // is_strike
-            this.data.push({x, y});
+            this.data.push({x: x, y: y});
           }
         });
         tf.util.shuffle(this.data);
 
         // Create batches.
         this.batches = createTensorBatches(this.data, this.batchSize);
-        console.log(`this.data.length: ${this.data.length}`);
-        console.log(`this.batches.length: ${this.batches.length}`);
         resolve();
       });
     });
   }
 
   zone() {
+    if (this.zoneData) {
+      return this.zoneData;
+    }
+
     const yMin = 0;
     const yMax = 4;
     const xMin = -2;
@@ -58,11 +60,18 @@ export class StrikeZoneData {
     const data = [];
     for (let y = yMax; y >= yMin; y = y - (yMax - yMin) / length) {
       for (let x = xMin; x <= xMax; x = x + (xMax - xMin) / length) {
-        //
-        // TODO(kreeger): Create batches here.
-        //
+        const xData = [];
+        xData.push(x);    // px
+        xData.push(y);    // pz
+        xData.push(3.5);  // sz_top
+        xData.push(1.5);  // sz_bot
+        xData.push(0);    // left_handed_batter
+        data.push({x: xData});
       }
     }
+
+    this.zoneData = createTensorBatches(data, 50)[0].x;
+    return this.zoneData;
   }
 }
 
@@ -94,13 +103,17 @@ function createTensorBatches(data, size) {
       xData.set(x, offset);
       offset += NUM_X_FIELDS;
 
-      yData.push(xyData.y);
+      if (xyData.y !== undefined) {
+        yData.push(xyData.y);
+      }
     }
 
     // Push batch tensor:
     batches.push({
       x: tf.tensor2d(xData, shape),
-      y: tf.oneHot(tf.tensor1d(yData, 'int32'), 2).toFloat()
+      y: yData.length > 0 ?
+          tf.oneHot(tf.tensor1d(yData, 'int32'), 2).toFloat() :
+          null
     });
 
     index += batchSize;

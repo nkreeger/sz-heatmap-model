@@ -62,9 +62,8 @@ export class StrikeZoneModel {
   /**
    * Returns ball/strike prediction (sorted) for a given pitch.
    */
-  predict(pitch) {
-    const pitchTensor = createPitchTensor(pitch, this.fields);
-    const predict = this.model.predict(pitchTensor);
+  predict(data) {
+    const predict = this.model.predict(data);
     const values = predict.dataSync();
 
     let list = [];
