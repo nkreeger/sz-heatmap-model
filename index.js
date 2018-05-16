@@ -2,44 +2,75 @@ import * as tf from '@tensorflow/tfjs';
 
 import {StrikeZoneData} from './data';
 import {StrikeZoneModel} from './model';
-import {draw} from './plot';
+import {draw, draw2, heatmap} from './plot';
 import {HeatMap} from './simpleheat';
 
-const data = new StrikeZoneData('http://localhost:1234/data.csv', 100);
+const DATA_URL =
+    'https://gist.githubusercontent.com/nkreeger/43edc6e6daecc2cb02a2dd3293a08f29/raw/51ad4623fe7811c84f9c3638c0631d64530068f6/sz-train-data.csv';
+const data = new StrikeZoneData(DATA_URL, 100);
 const model = new StrikeZoneModel();
+
+// Draw out 2d histogram of training data:
+function plotTrainingData() {
+  const balls = {x: [], y: []};
+  const strikes = {x: [], y: []};
+  data.data.forEach((d) => {
+    const x = d.x[0];
+    const y = d.x[1];
+
+    if (d.y) {
+      balls.x.push(x);
+      balls.y.push(y);
+    } else {
+      strikes.x.push(x);
+      strikes.y.push(y);
+    }
+  });
+  draw2('trainingData', balls, strikes);
+}
+
+function plotZoneData() {
+  const results = model.predictAll(data.zone());
+  const balls = {x: [], y: []};
+  const strikes = {x: [], y: []};
+  let index = 0;
+  data.zoneCoordinates.forEach((d) => {
+    const x = d.x[0];
+    const y = d.x[1];
+    const result = results[index++][0];
+    if (result.strike) {
+      strikes.x.push(x);
+      strikes.y.push(y);
+    } else {
+      balls.x.push(x);
+      balls.y.push(y);
+    }
+  });
+  draw2('evalData', balls, strikes);
+}
 
 async function start() {
   await data.load();
 
-  // model.train(1, data.batches, (result) => {
-  //   console.log(`step ${model.steps}] loss: ${
-  //       result.loss.toFixed(4)} accuracy: ${result.accuracy.toFixed(4)}`);
-  // });
+  plotTrainingData();
+  plotZoneData();
 
-  const results = model.predictAll(data.zone());
-  console.log(`Found: ${results.length}`);
-  console.log(`Data coords: ${data.zoneCoordinates.length}`);
+  await tf.nextFrame();
 
-  // Draw out 2d histogram of training data:
-  const pxs = [];
-  const pzs = [];
-  data.data.forEach((d) => {
-    pxs.push(d.x[0]);
-    pzs.push(d.x[1]);
-  });
-  draw('trainingData', pxs, pzs);
-
-  const heatmap = new HeatMap('test');
-  const points = [];
-  let index = 0;
-  data.zoneCoordinates.forEach((d) => {
-    const result = results[index++][0];
-    if (result.strike) {
-      points.push({x: d.x[0], y: d.x[1], value: result.value});
-      heatmap.add([d.x[0], d.x[1], result.value]);
+  for (let i = 0; i < 100; i++) {  // break out.
+    for (let j = 0; j < data.batches.length; j++) {
+      model.train(data.batches[j], (result) => {
+        if (model.steps % 100 === 0) {
+          console.log(`step ${model.steps}] loss: ${
+              result.loss.toFixed(4)} accuracy:${result.accuracy.toFixed(4)}`);
+        }
+      });
+      if (j % 10 === 0) {
+        plotZoneData();
+      }
+      await tf.nextFrame();
     }
-  });
-  heatmap.draw();
+  }
 }
 
 start();

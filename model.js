@@ -26,8 +26,9 @@ export class StrikeZoneModel {
     const model = tf.sequential();
     model.add(
         tf.layers.dense({units: 40, activation: 'relu', inputShape: [5]}));
+    model.add(tf.layers.dropout({rate: 0.1}));
     model.add(tf.layers.dense({units: 20, activation: 'relu'}));
-    model.add(tf.layers.dropout({rate: 0.1}))
+    model.add(tf.layers.dropout({rate: 0.1}));
     model.add(tf.layers.dense({units: 2, activation: 'softmax'}));
     model.compile({
       optimizer: tf.train.adam(),
@@ -39,24 +40,19 @@ export class StrikeZoneModel {
     this.steps = 0;
   }
 
-  async train(epochs, data, callback) {
-    for (let i = 0; i < epochs; i++) {
-      for (let j = 0; j < data.length; j++) {
-        const batch = data[j];
-        await this.model.fit(batch.x, batch.y, {
-          epochs: 1,
-          shuffle: false,
-          validationData: [batch.x, batch.y],
-          batchSize: 100,
-          callbacks: {
-            onEpochEnd: async (epoch, logs) => {
-              callback({accuracy: logs.acc, loss: logs.loss});
-            }
-          }
-        });
-        this.steps++;
+  async train(data, callback) {
+    await this.model.fit(data.x, data.y, {
+      epochs: 1,
+      shuffle: false,
+      validationData: [data.x, data.y],
+      batchSize: data.length,
+      callbacks: {
+        onEpochEnd: async (epoch, logs) => {
+          callback({accuracy: logs.acc, loss: logs.loss});
+        }
       }
-    }
+    });
+    this.steps++;
   }
 
   /**
