@@ -3,7 +3,6 @@ import * as tf from '@tensorflow/tfjs';
 import {StrikeZoneData} from './data';
 import {StrikeZoneModel} from './model';
 import {draw, draw2, heatmap} from './plot';
-import {HeatMap} from './simpleheat';
 
 const DATA_URL =
     'https://gist.githubusercontent.com/nkreeger/43edc6e6daecc2cb02a2dd3293a08f29/raw/51ad4623fe7811c84f9c3638c0631d64530068f6/sz-train-data.csv';
