@@ -56,7 +56,7 @@ async function start() {
 
   await tf.nextFrame();
 
-  for (let i = 0; i < 100; i++) {  // break out.
+  for (let i = 0; i < 1; i++) {  // break out.
     for (let j = 0; j < data.batches.length; j++) {
       model.train(data.batches[j], (result) => {
         if (model.steps % 100 === 0) {

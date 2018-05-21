@@ -13,9 +13,11 @@
   },
   "scripts": {
     "watch": "NODE_ENV=development parcel --no-hmr index.html ",
+    "watch-test": "NODE_ENV=development parcel --no-hmr test.html ",
     "build": "NODE_ENV=production parcel build index.html  --no-minify --public-url ./"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^0.10.3"
+    "@tensorflow/tfjs": "^0.10.3",
+    "d3": "^5.4.0"
   }
 }
