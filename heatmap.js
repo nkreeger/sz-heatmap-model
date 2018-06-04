@@ -1,84 +1,68 @@
 import * as d3 from 'd3';
 
-export function testHeatmap() {
-  const data = [
-    {'week': 1, 'day': 1, 'value': 6},
-    {'week': 1, 'day': 2, 'value': 7},
-    {'week': 1, 'day': 3, 'value': 9},
-    {'week': 1, 'day': 4, 'value': 11},
-    {'week': 1, 'day': 5, 'value': 8},
-    {'week': 1, 'day': 6, 'value': 9},
-    {'week': 1, 'day': 7, 'value': 12},
-    {'week': 2, 'day': 1, 'value': 7},
-    {'week': 2, 'day': 2, 'value': 9},
-    {'week': 2, 'day': 3, 'value': 2},
-    {'week': 2, 'day': 4, 'value': 8},
-    {'week': 2, 'day': 5, 'value': 4},
-    {'week': 2, 'day': 6, 'value': 5},
-    {'week': 2, 'day': 7, 'value': 6},
-  ];
+const SIZE = 50;
+const WIDTH = 500;
+const HEIGHT = 500;
 
-  const colorDomain = d3.extent(data, (d) => {
-    return d.value;
-  });
+export class StrikeZoneHeatmap {
+  constructor(coords) {
+    const colorDomain = d3.extent(coords, (coord) => {
+      return coord.value;
+    });
 
-  const colorScale =
-      d3.scaleLinear().domain(colorDomain).range(['lightblue', 'blue']);
+    this.ballColorScale =
+        d3.scaleLinear().domain(colorDomain).range(['lightblue', 'blue']);
+    this.strikeColorScale =
+        d3.scaleLinear().domain(colorDomain).range(['orange', 'red']);
 
-  const svg =
-      d3.select('.heatmap').append('svg').attr('width', 500, 'height', 500);
+    this.svg = d3.select('.strike-zone')
+                   .append('svg')
+                   .attr('width', WIDTH)
+                   .attr('height', HEIGHT);
 
-  const rects = svg.selectAll('rect').data(data).enter().append('rect');
+    // scale:
+    const min = coords[0];
+    const max = coords[coords.length - 1];
+    this.scaleX =
+        d3.scaleLinear().domain([min.x, max.x]).range([0, WIDTH / SIZE]);
+    this.scaleY =
+        d3.scaleLinear().domain([min.y, max.y]).range([0, HEIGHT / SIZE]);
 
-  rects
-      .attr(
-          'x',
-          (d) => {
-            return d.day * 50;
-          })
-      .attr(
-          'y',
-          (d) => {
-            return d.week * 50;
-          })
-      .attr('width', 50)
-      .attr('height', 50)
-      .style('fill', (d) => {return colorScale(d.value)});
-}
+    const minx = this.scaleX(min.x) * SIZE;
+    const maxx = this.scaleX(max.x) * SIZE;
+    const miny = this.scaleY(min.y) * SIZE;
+    const maxy = this.scaleY(max.y) * SIZE;
 
-export function strikeZoneHeatmap(coords) {
-  const colorDomain = d3.extent(coords, (coord) => {
-    return coord.value;
-  });
+    this.rects = this.svg.selectAll('rect').data(coords).enter().append('rect');
+    this.render();
+  }
 
-  const ballColorScale =
-      d3.scaleLinear().domain(colorDomain).range(['lightblue', 'blue']);
-  const strikeColorScale =
-      d3.scaleLinear().domain(colorDomain).range(['orange', 'red']);
+  update(coords) {
+    this.rects.data(coords);
+    // d3.transition?
+    this.render();
+  }
 
-  const svg =
-      d3.select('.strike-zone').append('svg').attr('width', 500, 'height', 500);
-
-  const size = 100;
-  const rects = svg.selectAll('rect').data(coords).enter().append('rect');
-  rects
-      .attr(
-          'x',
-          (coord) => {
-            return coord.x * size;
-          })
-      .attr(
-          'y',
-          (coord) => {
-            return coord.y * size;
-          })
-      .attr('width', size)
-      .attr('height', size)
-      .style('fill', (coord) => {
-        if (coord.strike) {
-          return strikeColorScale(coord.value);
-        } else {
-          return ballColorScale(coord.value);
-        }
-      });
+  render() {
+    this.rects
+        .attr(
+            'x',
+            (coord) => {
+              return this.scaleX(coord.x) * SIZE;
+            })
+        .attr(
+            'y',
+            (coord) => {
+              return this.scaleY(coord.y) * SIZE;
+            })
+        .attr('width', SIZE)
+        .attr('height', SIZE)
+        .style('fill', (coord) => {
+          if (coord.strike) {
+            return this.strikeColorScale(coord.value);
+          } else {
+            return this.ballColorScale(coord.value);
+          }
+        });
+  }
 }
