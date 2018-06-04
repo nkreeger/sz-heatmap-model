@@ -11,10 +11,10 @@ export class StrikeZoneHeatmap {
     });
 
     this.ballColorScale = d3.scaleLinear().domain(colorDomain).range([
-      'rgba(0,0,255,0.1)', 'rgba(0,0,255,0.25)'
+      'rgba(127, 172, 255, 0.5)', 'rgba(0, 90, 255, 0.5)'
     ]);
     this.strikeColorScale = d3.scaleLinear().domain(colorDomain).range([
-      'rgba(255,0,0,0.2)', 'rgba(255,0,0,0.75)'
+      'rgba(255, 210, 127, 0.5)', 'rgba(255, 165, 0, 0.5)'
     ]);
 
     this.svg = d3.select('.strike-zone')
@@ -37,6 +37,8 @@ export class StrikeZoneHeatmap {
 
     this.rects = this.svg.selectAll('rect').data(coords).enter().append('rect');
     this.render();
+
+    this.drawStrikeZoneBounds();
   }
 
   update(coords) {
@@ -66,5 +68,31 @@ export class StrikeZoneHeatmap {
             return this.ballColorScale(coord.value);
           }
         });
+  }
+
+  drawStrikeZoneBounds() {
+    const szWidthHalf = 0.7081;
+    const szHeightMin = 1.5;
+    const szHeightMax = 3.5
+    // Draw the strike zone:
+    // TODO(kreeger): Cleanup
+    const points = [
+      this.scaleX(-szWidthHalf) * SIZE,
+      this.scaleY(szHeightMin) * SIZE,
+      this.scaleX(-szWidthHalf) * SIZE,
+      this.scaleY(szHeightMax) * SIZE,
+      this.scaleX(szWidthHalf) * SIZE,
+      this.scaleY(szHeightMax) * SIZE,
+      this.scaleX(szWidthHalf) * SIZE,
+      this.scaleY(szHeightMin) * SIZE,
+      this.scaleX(-szWidthHalf) * SIZE,
+      this.scaleY(szHeightMin) * SIZE,
+    ];
+
+    this.svg.append('polyline')
+        .attr('fill', 'none')
+        .attr('stroke', 'black')
+        .attr('stroke-width', '2')
+        .attr('points', points);
   }
 }
