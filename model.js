@@ -25,9 +25,9 @@ export class StrikeZoneModel {
   constructor() {
     const model = tf.sequential();
     model.add(
-        tf.layers.dense({units: 40, activation: 'relu', inputShape: [5]}));
+        tf.layers.dense({units: 20, activation: 'relu', inputShape: [5]}));
     model.add(tf.layers.dropout({rate: 0.1}));
-    model.add(tf.layers.dense({units: 20, activation: 'relu'}));
+    model.add(tf.layers.dense({units: 10, activation: 'relu'}));
     model.add(tf.layers.dropout({rate: 0.1}));
     model.add(tf.layers.dense({units: 2, activation: 'softmax'}));
     model.compile({

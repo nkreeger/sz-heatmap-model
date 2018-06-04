@@ -54,7 +54,7 @@ async function start() {
   await tf.nextFrame();
 
   if (true) {
-    for (let i = 0; i < 20; i++) {  // break out.
+    for (let i = 0; i < 50; i++) {  // break out.
       for (let j = 0; j < data.batches.length; j++) {
         model.train(data.batches[j], (result) => {
           if (model.steps % 100 === 0) {
@@ -63,7 +63,7 @@ async function start() {
                     4)} accuracy:${result.accuracy.toFixed(4)}`);
           }
         });
-        if (j % 5 === 0) {
+        if (j % 2 === 0) {
           heatmap.update(generateCoords());
         }
         await tf.nextFrame();

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-const SIZE = 50;
+const SIZE = 10;
 const WIDTH = 500;
 const HEIGHT = 500;
 
@@ -10,10 +10,12 @@ export class StrikeZoneHeatmap {
       return coord.value;
     });
 
-    this.ballColorScale =
-        d3.scaleLinear().domain(colorDomain).range(['lightblue', 'blue']);
-    this.strikeColorScale =
-        d3.scaleLinear().domain(colorDomain).range(['orange', 'red']);
+    this.ballColorScale = d3.scaleLinear().domain(colorDomain).range([
+      'rgba(0,0,255,0.1)', 'rgba(0,0,255,0.25)'
+    ]);
+    this.strikeColorScale = d3.scaleLinear().domain(colorDomain).range([
+      'rgba(255,0,0,0.2)', 'rgba(255,0,0,0.75)'
+    ]);
 
     this.svg = d3.select('.strike-zone')
                    .append('svg')
