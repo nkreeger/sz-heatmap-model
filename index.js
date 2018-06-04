@@ -47,7 +47,7 @@ function generateCoords() {
 async function start() {
   await data.load();
 
-  plotTrainingData();
+  // plotTrainingData();
 
   const heatmap = new StrikeZoneHeatmap(generateCoords());
 
@@ -64,6 +64,8 @@ async function start() {
           }
         });
         if (j % 2 === 0) {
+          await tf.nextFrame();
+
           heatmap.update(generateCoords());
         }
         await tf.nextFrame();
