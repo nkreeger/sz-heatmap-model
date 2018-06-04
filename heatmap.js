@@ -45,3 +45,40 @@ export function testHeatmap() {
       .attr('height', 50)
       .style('fill', (d) => {return colorScale(d.value)});
 }
+
+export function strikeZoneHeatmap(coords) {
+  const colorDomain = d3.extent(coords, (coord) => {
+    return coord.value;
+  });
+
+  const ballColorScale =
+      d3.scaleLinear().domain(colorDomain).range(['lightblue', 'blue']);
+  const strikeColorScale =
+      d3.scaleLinear().domain(colorDomain).range(['orange', 'red']);
+
+  const svg =
+      d3.select('.strike-zone').append('svg').attr('width', 500, 'height', 500);
+
+  const size = 100;
+  const rects = svg.selectAll('rect').data(coords).enter().append('rect');
+  rects
+      .attr(
+          'x',
+          (coord) => {
+            return coord.x * size;
+          })
+      .attr(
+          'y',
+          (coord) => {
+            return coord.y * size;
+          })
+      .attr('width', size)
+      .attr('height', size)
+      .style('fill', (coord) => {
+        if (coord.strike) {
+          return strikeColorScale(coord.value);
+        } else {
+          return ballColorScale(coord.value);
+        }
+      });
+}

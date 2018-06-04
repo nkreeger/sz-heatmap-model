@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 
 import {StrikeZoneData} from './data';
-import {testHeatmap} from './heatmap';
+import {strikeZoneHeatmap, testHeatmap} from './heatmap';
 import {StrikeZoneModel} from './model';
 import {draw, draw2, heatmap} from './plot';
 import {d3plotTest} from './test';
@@ -34,21 +34,17 @@ function plotZoneData() {
   const results = model.predictAll(data.zone());
   const balls = {x: [], y: []};
   const strikes = {x: [], y: []};
+
+  const coords = [];
   let index = 0;
   data.zoneCoordinates.forEach((d) => {
-    const x = d.x[0];
-    const y = d.x[1];
     const result = results[index++][0];
-    if (result.strike) {
-      strikes.x.push(x);
-      strikes.y.push(y);
-    } else {
-      balls.x.push(x);
-      balls.y.push(y);
-    }
+    coords.push(
+        {x: d.x[0], y: d.x[1], strike: result.strike, value: result.value});
   });
-  console.log(balls);
-  d3plotTest(balls, strikes);
+
+  console.log('coords.length', coords.length);
+  strikeZoneHeatmap(coords);
 }
 
 async function start() {
@@ -57,25 +53,24 @@ async function start() {
   plotTrainingData();
 
   testHeatmap();
-  // plotZoneData();
+  plotZoneData();
 
-  // await tf.nextFrame();
+  await tf.nextFrame();
 
-  // for (let i = 0; i < 1; i++) {  // break out.
-  //   for (let j = 0; j < data.batches.length; j++) {
-  //     model.train(data.batches[j], (result) => {
-  //       if (model.steps % 100 === 0) {
-  //         console.log(`step ${model.steps}] loss: ${
-  //             result.loss.toFixed(4)}
-  //             accuracy:${result.accuracy.toFixed(4)}`);
-  //       }
-  //     });
-  //     if (j % 10 === 0) {
-  //       plotZoneData();
-  //     }
-  //     await tf.nextFrame();
-  //   }
-  // }
+  for (let i = 0; i < 1; i++) {  // break out.
+    for (let j = 0; j < data.batches.length; j++) {
+      model.train(data.batches[j], (result) => {
+        if (model.steps % 100 === 0) {
+          console.log(`step [${model.steps}] loss: ${
+              result.loss.toFixed(4)} accuracy:${result.accuracy.toFixed(4)}`);
+        }
+      });
+      if (j % 10 === 0) {
+        plotZoneData();
+      }
+      await tf.nextFrame();
+    }
+  }
 }
 
 start();
