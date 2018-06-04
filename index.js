@@ -1,8 +1,10 @@
 import * as tf from '@tensorflow/tfjs';
 
 import {StrikeZoneData} from './data';
+import {testHeatmap} from './heatmap';
 import {StrikeZoneModel} from './model';
 import {draw, draw2, heatmap} from './plot';
+import {d3plotTest} from './test';
 
 const DATA_URL =
     'https://gist.githubusercontent.com/nkreeger/43edc6e6daecc2cb02a2dd3293a08f29/raw/51ad4623fe7811c84f9c3638c0631d64530068f6/sz-train-data.csv';
@@ -45,31 +47,35 @@ function plotZoneData() {
       balls.y.push(y);
     }
   });
-  draw2('evalData', balls, strikes);
+  console.log(balls);
+  d3plotTest(balls, strikes);
 }
 
 async function start() {
   await data.load();
 
   plotTrainingData();
-  plotZoneData();
 
-  await tf.nextFrame();
+  testHeatmap();
+  // plotZoneData();
 
-  for (let i = 0; i < 1; i++) {  // break out.
-    for (let j = 0; j < data.batches.length; j++) {
-      model.train(data.batches[j], (result) => {
-        if (model.steps % 100 === 0) {
-          console.log(`step ${model.steps}] loss: ${
-              result.loss.toFixed(4)} accuracy:${result.accuracy.toFixed(4)}`);
-        }
-      });
-      if (j % 10 === 0) {
-        plotZoneData();
-      }
-      await tf.nextFrame();
-    }
-  }
+  // await tf.nextFrame();
+
+  // for (let i = 0; i < 1; i++) {  // break out.
+  //   for (let j = 0; j < data.batches.length; j++) {
+  //     model.train(data.batches[j], (result) => {
+  //       if (model.steps % 100 === 0) {
+  //         console.log(`step ${model.steps}] loss: ${
+  //             result.loss.toFixed(4)}
+  //             accuracy:${result.accuracy.toFixed(4)}`);
+  //       }
+  //     });
+  //     if (j % 10 === 0) {
+  //       plotZoneData();
+  //     }
+  //     await tf.nextFrame();
+  //   }
+  // }
 }
 
 start();
